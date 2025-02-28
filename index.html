@@ -15,17 +15,21 @@
     </style>
 </head>
 <body>
+
     <h2>Weekly Timesheet</h2>
-    
-    <div class="input-field">
-        <label for="week">Select Week: </label>
-        <select id="week" onchange="updateDates()">
-            <option value="1">Week 1</option>
-            <option value="2">Week 2</option>
-            <option value="3">Week 3</option>
-            <option value="4">Week 4</option>
-        </select>
-    </div>
+
+    <label for="month">Select Month: </label>
+    <select id="month" onchange="updateDates()"></select>
+
+    <label for="week">Select Week: </label>
+    <select id="week" onchange="updateDates()">
+        <option value="1">Week 1</option>
+        <option value="2">Week 2</option>
+        <option value="3">Week 3</option>
+        <option value="4">Week 4</option>
+        <option value="5">Week 5</option>
+
+    </select>
 
     <div class="input-field">
         <label for="name">Name: </label>
@@ -36,59 +40,48 @@
         <input type="email" id="email" required>
     </div>
     
-    <p id="error-message" style="color: red;" class="hidden">Name and Email are required!</p> <!-- Error message -->
+    <p id="error-message" style="color: red;" class="hidden">Name and Email are required!</p> 
 
-    <table>
-        <tr>
-            <th>Day</th>
-            <th>Date</th>
-            <th>Login Time</th>
-            <th>Logout Time</th>
-            <th>Break (hrs)</th>
-        </tr>
-        <tr>
-            <td>Monday</td>
-            <td><input type="date" id="mon_date" readonly></td>
-            <td><input type="time" id="mon_login" value="08:00"></td>
-            <td><input type="time" id="mon_logout" value="17:00"></td>
-            <td><input type="number" id="mon_break" step="0.1" value="1"></td>
-        </tr>
-        <tr>
-            <td>Tuesday</td>
-            <td><input type="date" id="tue_date" readonly></td>
-            <td><input type="time" id="tue_login" value="08:00"></td>
-            <td><input type="time" id="tue_logout" value="17:00"></td>
-            <td><input type="number" id="tue_break" step="0.1" value="1"></td>
-        </tr>
-        <tr>
-            <td>Wednesday</td>
-            <td><input type="date" id="wed_date" readonly></td>
-            <td><input type="time" id="wed_login" value="08:00"></td>
-            <td><input type="time" id="wed_logout" value="17:00"></td>
-            <td><input type="number" id="wed_break" step="0.1" value="1"></td>
-        </tr>
-        <tr>
-            <td>Thursday</td>
-            <td><input type="date" id="thu_date" readonly></td>
-            <td><input type="time" id="thu_login" value="08:00"></td>
-            <td><input type="time" id="thu_logout" value="17:00"></td>
-            <td><input type="number" id="thu_break" step="0.1" value="1"></td>
-        </tr>
-        <tr>
-            <td>Friday</td>
-            <td><input type="date" id="fri_date" readonly></td>
-            <td><input type="time" id="fri_login" value="08:00"></td>
-            <td><input type="time" id="fri_logout" value="17:00"></td>
-            <td><input type="number" id="fri_break" step="0.1" value="1"></td>
-        </tr>
+    <table id="timesheet">
+        <thead>
+            <tr>
+                <th>Day</th>
+                <th>Date</th>
+                <th>Login Time</th>
+                <th>Logout Time</th>
+                <th>Break (hrs)</th>
+            </tr>
+        </thead>
+        <tbody id="timesheet-body">
+            
+        </tbody>
     </table>
 
     <p id="loadingMsg" class="hidden">Don't refresh the page until the confirmation popup appears.</p>
     
-    <button id="submitBtn" onclick="submitForm()">Submit</button>
 
+    <button id="submitBtn" onclick="submitForm()">Submit</button>
     <script>
-        const scriptURL = "https://script.google.com/macros/s/AKfycbyHqIpWvgYqOvp8ixZQXH3IytzRTePPvlEm6skCpiTMEKd9_ETeSZH_aK_qURk-nLfc/exec"; // Replace with your deployed App Script URL
+
+        const scriptURL = "https://script.google.com/macros/s/AKfycbyHqIpWvgYqOvp8ixZQXH3IytzRTePPvlEm6skCpiTMEKd9_ETeSZH_aK_qURk-nLfc/exec"; 
+
+
+        function populateMonthDropdown() {
+            const monthDropdown = document.getElementById('month');
+            const today = new Date();
+            const currentMonth = today.getMonth();
+
+            for (let i = 0; i <= currentMonth; i++) {
+                const option = document.createElement('option');
+                option.value = i;
+                option.text = new Date(today.getFullYear(), i).toLocaleString('default', { month: 'long' });
+                if (i === currentMonth) {
+                    option.selected = true;
+                }
+                monthDropdown.appendChild(option);
+            }
+        }
+
 
 		function submitForm() {
 			let name = document.getElementById('name').value.trim();
@@ -111,7 +104,10 @@
 
 			days.forEach(day => {
 				let shortDay = day.toLowerCase().substring(0,3);
-				let dateValue = document.getElementById(shortDay + '_date').value;
+                
+				let dateValue = document.getElementById(day).value;
+
+                
 				let formattedDate = new Date(dateValue).toLocaleDateString('en-GB'); // Formats to DD/MM/YYYY
 
 				data.push({
@@ -119,9 +115,9 @@
 					email: email,
 					day: day,
 					date: formattedDate, // Send formatted date
-					login: document.getElementById(shortDay + '_login').value,
-					logout: document.getElementById(shortDay + '_logout').value,
-					break: document.getElementById(shortDay + '_break').value
+					login: document.getElementById(day + '_login').value,
+					logout: document.getElementById(day + '_logout').value,
+					break: document.getElementById(day + '_break').value
 				});
 			});
 
@@ -133,7 +129,7 @@
 			})
 			.then(()=> {
 				alert("Timesheet submitted successfully!");
-				location.reload();  // 🔹 Reload the page after the alert popup
+				location.reload();
 			})
 			.catch(error => alert("Error submitting timesheet: " + error))
 			.finally(() => {
@@ -141,42 +137,64 @@
 			});
 		}
 
-		function updateDates() {
-			const week = document.getElementById('week').value;
-			const today = new Date();
-			const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
-			let firstMonday = new Date(startOfMonth);
-            while (firstMonday.getDay() !== 1) { // 1 = Monday
-                firstMonday.setDate(firstMonday.getDate() + 1);
-            }
-
-            // Adjust for the selected week
-            const weekStart = new Date(firstMonday.toLocaleDateString());
-            weekStart.setDate(firstMonday.getDate() + (week - 1) * 7);
+        function updateDates() {
             
-            const days = ['mon', 'tue', 'wed', 'thu', 'fri'];
+            const month = parseInt(document.getElementById('month').value);
+            const week = parseInt(document.getElementById('week').value);
+            const today = new Date();
+            const year = today.getFullYear();
+            const startofmonth = new Date(year,month,1);
+            
+            // Adjust for the selected week
+            const weekStart = new Date(startofmonth);
+            weekStart.setDate(startofmonth.getDate() + (week - 1) * 7);
+
+            
+
+            const tbody = document.getElementById('timesheet-body');
+            tbody.innerHTML = '';  // Clear existing rows
+
             let isFutureWeek = false;
 
-            for (let i = 0; i < days.length; i++) {
-                let dateField = document.getElementById(`${days[i]}_date`);
+            days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
+
+            for ( i =0; i < days.length; i++){
+                
                 let currentDate = new Date(weekStart);
+
                 currentDate.setDate(weekStart.getDate() + i);
+    
+                
+                if (currentDate.getDay() !== 0 && currentDate.getDay() !== 6 ){
 
-                // Ensure correct local time format
-                let formattedDate = currentDate.getFullYear() + '-' +
-                                    String(currentDate.getMonth() + 1).padStart(2, '0') + '-' +
-                                    String(currentDate.getDate()).padStart(2, '0');
+                    if (currentDate.getMonth() === month){
+                        const dayName = currentDate.toLocaleDateString('en-us', { weekday: 'long' });
 
-                dateField.value = formattedDate;
-                dateField.max = today.toISOString().split('T')[0]; // Prevent future dates
+                        let dateStr = currentDate.getFullYear() + '-' +
+                                        String(currentDate.getMonth() + 1).padStart(2, '0') + '-' +
+                                        String(currentDate.getDate()).padStart(2, '0');
 
-                if (currentDate > today) isFutureWeek = true;
+
+                        const row = `<tr>
+                        <td>${dayName}</td>
+                        <td><input type="date" id ="${dayName}" value="${dateStr}" readonly></td>
+                        <td><input type="time" id ="${dayName}_login"  value="08:00"></td>
+                        <td><input type="time" id ="${dayName}_logout" value="17:00"></td>
+                        <td><input type="number" id ="${dayName}_break" step="0.1" value="1"></td>
+                        </tr>`;
+                        tbody.innerHTML += row;
+                    }
+
+                }  
             }
-			document.getElementById("submitBtn").disabled = isFutureWeek;
-		}
 
-		window.onload = updateDates;
+            document.getElementById('submitBtn').disabled = isFutureWeek;
+        }
 
+
+        window.onload = function() {
+            populateMonthDropdown();
+            updateDates();
+        };
     </script>
 </body>
-</html>

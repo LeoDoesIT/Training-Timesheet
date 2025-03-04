@@ -185,7 +185,8 @@
                         tbody.innerHTML += row;
                     }
 
-                }  
+                }
+                if (currentDate > today) isFutureWeek = true;  
             }
 
             document.getElementById('submitBtn').disabled = isFutureWeek;
